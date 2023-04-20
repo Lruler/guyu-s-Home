@@ -10,7 +10,7 @@ export const themeConfig = {
   docsDir: '/docs',
   series,
   navbar,
-  docsRepo: 'https://github.com/vuepress-reco/vuepress-theme-reco',
+  docsRepo: 'https://github.com/Lruler/guyu-s-Home',
   bulletin: {
     body: [
       {
