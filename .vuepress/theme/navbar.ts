@@ -1,10 +1,10 @@
 export const navbar = [
     { text: "主页", link: "/" },
     { text: "前端", link: "/docs/fe/html" },
-    { text: "后端", link: "/tags/tag1/1/" },
-    { text: "运维", link: "/tags/tag1/1/" },
-    { text: "算法", link: "/tags/tag1/1/" },
-    { text: "人工智能", link: "/tags/tag1/1/" },
+    { text: "后端", link: "/docs/be/database" },
+    { text: "运维", link: "/docs/ops/devops" },
+    { text: "算法", link: "/docs/algorithm/base" },
+    { text: "人工智能", link: "/docs/ai/ai" },
     {
         text: "我的江湖",
         children: [
