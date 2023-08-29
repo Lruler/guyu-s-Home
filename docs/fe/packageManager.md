@@ -147,9 +147,9 @@ node_modules
 >
 > 现在我们回过头来看，根目录下的 node_modules 下面不再是眼花缭乱的依赖，而是跟 package.json 声明的依赖基本保持一致。即使 pnpm 内部会有一些包会设置依赖提升，会被提升到根目录 node_modules 当中，但整体上，根目录的`node_modules`比以前还是清晰和规范了许多。
 
+`pnpm` 也解决了幽灵依赖的问题
 
-
-延伸: 执行 npm run 后发生什么？
+### 延伸: 执行 npm run 后发生什么？
 
 1. 运行 npm run xxx的时候，npm 会先在当前目录的 node_modules/.bin 查找要执行的程序，如果找到则运行；
 
@@ -180,6 +180,8 @@ bin字段不是在自己项目的package.json文件里面，而是在库的源�
 yalc是一个用于本地软件包开发和管理的工具。它可以让你在本地创建软件包并将其链接到其他本地项目中，而不必在NPM注册表上发布它们。这使得在本地进行开发和测试变得更加容易和灵活，而且不需要在不同项目之间频繁地进行版本控制。
 
 `yalc publish` 对应的包先发布。然后 yalc link 链接
+
+### monorepo
 
 ![](../../.vuepress/public/fe/memorepo.webp)
 

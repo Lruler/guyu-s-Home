@@ -32,7 +32,7 @@ export const series = {
       },
       {
         text: '工具篇',
-        children: ['vite', 'webpack', 'packageManager']
+        children: ['esm', 'vite', 'webpack', 'packageManager']
       },
       {
         text: '零碎知识点',

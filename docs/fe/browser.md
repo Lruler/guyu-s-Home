@@ -24,13 +24,14 @@ title: 浏览器
 浏览器打开URL
 URL组成
 
-# XSS攻击
+## 网络安全攻击
+#### XSS攻击
 
 （Cross Site Scripting) 跨站脚本攻击，缩写css容易混淆，故改名xss
 
 不过现在react和vue等一些前端框架支持的jsx写法，会默认转义成字符，所以前端到不用考虑太多如何防范，除非必须要用到dangerouslySetInnerHTML，仔细想了想我目前接触到的业务直接用这个属性的话，是只有转译markdown语法才会用到，however，几个开源的markdown解析库也都默认过滤掉`<script>`等一些可能会是xss攻击的脚本标签，所以现在的前端项目很难被xss攻击了，想更多了解的可以参考一下[这篇文章](https://tech.meituan.com/2018/09/27/fe-security.html)
 
-# CSRF攻击
+#### CSRF攻击
 
 CSRF（Cross-site request forgery）跨站请求伪造，典型流程为
 
@@ -45,22 +46,22 @@ CSRF（Cross-site request forgery）跨站请求伪造，典型流程为
 
 后续还有
 
-# injection (注入攻击)
+#### injection (注入攻击)
 
 sql语句注入，这一般看后端防范了，当然我们要是用ORM + NoSql应该可以无视 :D
 
-# SSRF (服务端伪造请求)
+#### SSRF (服务端伪造请求)
 
 Server-Side Request Forgery:服务器端请求伪造
 
-# DOS (把服务器搞崩)
+#### DOS (把服务器搞崩)
 
 DOS和DDOS [参考文章](https://www.yisu.com/news/id_393.html#:~:text=DoS%E6%98%AF%E2%80%9C%E6%8B%92%E7%BB%9D%E6%9C%8D%E5%8A%A1%E6%94%BB%E5%87%BB,%E7%A7%8D%E6%96%B0%E7%9A%84%E6%94%BB%E5%87%BB%E6%96%B9%E5%BC%8F%E3%80%82)
 
 ​
 [浏览器](https://juejin.cn/post/6844904021308735502#heading-0)
 
-# 在浏览器中输入Url后会发生什么？
+## 在浏览器中输入Url后会发生什么？
 
 老生常谈，简单的看下过程，分为如下几步
 
@@ -167,21 +168,21 @@ display:none 会触发 reflow，visibility: hidden属性并不算是不可见属
 
 [参考链接](https://www.jianshu.com/p/54cc04190252)
 
-### Service Worker
+#### Service Worker
 
 Service Worker 是运行在浏览器背后的独立线程，一般可以用来实现缓存功能。使用 Service Worker的话，传输协议必须为 HTTPS。
 
 **Service Worker 的缓存与浏览器其他内建的缓存机制不同，它可以让我们自由控制缓存哪些文件、如何匹配缓存、如何读取缓存，并且缓存是持续性的**。
 
-### Memory Cache
+#### Memory Cache
 
 Memory Cache 也就是内存中的缓存，主要包含的是当前中页面中已经抓取到的资源,例如页面上已经下载的样式、脚本、图片等。读取内存中的数据肯定比磁盘快,内存缓存虽然读取高效，可是缓存持续性很短，会随着进程的释放而释放。 **一旦我们关闭 Tab 页面，内存中的缓存也就被释放了**。
 
-### Disk Cache
+#### Disk Cache
 
 Disk Cache 也就是存储在硬盘中的缓存，读取速度慢点，但是什么都能存储到磁盘中，**比之 Memory Cache 胜在容量和存储时效性上**。
 
-### Push Cache
+#### Push Cache
 
 Push Cache（推送缓存）是 HTTP/2 中的内容，当以上三种缓存都没有命中时，它才会被使用。**它只在会话（Session）中存在，一旦会话结束就被释放，并且缓存时间也很短暂**，在Chrome浏览器中只有5分钟左右，同时它也并非严格执行HTTP头中的缓存指令。
 
@@ -192,7 +193,7 @@ Push Cache（推送缓存）是 HTTP/2 中的内容，当以上三种缓存都�
 
 ### 强缓存
 
-设置强缓存后, 页面第一次加载 走的是 disk(磁盘)缓存, 如果刷新页面就会走 memory(内存)缓存, 当然内存有限不是所以都能从disk(磁盘)缓存走到memory(内存)缓存的.如果memory(内存)满了,那么没进入memory(内存)缓存的还是从disk(磁盘)拿.
+设置强缓存后, 页面第一次加载 走的是 disk(磁盘)缓存, 如果刷新页面就会走 memory(内存)缓存, 当然内存有限不是所以都能从disk(磁盘)缓存走到memory(内存)缓存的.如果memory(内存)满了,那么没进入memory(内存)缓存的还是从disk(磁盘)拿. 返回200 不会访问服务器
 
 `强制缓存就是向浏览器缓存查找该请求结果，并根据该结果的缓存规则来决定是否使用该缓存结果的过程。`当浏览器向服务器发起请求时，服务器会将缓存规则放入HTTP响应报文的HTTP头中和请求结果一起返回给浏览器，控制强制缓存的字段分别是 `Expires` 和 `Cache-Control`，其中Cache-Control优先级比Expires高。因为前者是HTTP1.1产物，后者是过时的1.0产物
 
@@ -405,6 +406,34 @@ Cookie 是用于在客户端存储少量数据的一种机制。Cookie 具有以
 （4）服务器用同样的HSA256算法和密钥，对数据再计算一次签名，和token的签名做比较
 
 （5）如果相同，服务器就知道客户端登录过，则反之。
+JWT是`json web token`缩写。它将用户信息加密到`token`里，服务器不保存任何用户信息。服务器通过使用保存的密钥验证`token`的正确性，只要正确即通过验证。
+
+JWT包含三个部分： `Header`头部，`Payload`负载和`Signature`签名。由三部分生成`token`，三部分之间用“`.`”号做分割。
+
+- `Header` 声明信息。 在`Header`中通常包含了两部分：`type`：代表`token`的类型，这里使用的是`JWT`类型。
+  alg:使用的`Hash`算法，例如`HMAC SHA256`或`RSA`.
+  `{ “alg”: “HS256”, “typ”: “JWT” }` 这会被经过base64Url编码形成第一部分
+
+- `Payload token`的第二个部分是荷载信息，它包含一些声明Claim(实体的描述，通常是一个`User`信息，还包括一些其他的元数据)
+  声明分三类:
+  1)`Reserved Claims`,这是一套预定义的声明，并不是必须的,这是一套易于使用、操作性强的声明。包括：`iss(issuer)、exp(expiration time)、sub(subject)、aud(audience)`等
+  2)`Plubic Claims`,
+  3)`Private Claims`,交换信息的双方自定义的声明 `{ “sub”: “1234567890”, “name”: “John Doe”,“admin”: true }` 同样经过`Base64Url`编码后形成第二部分
+
+- `signature` 使用`header`中指定的算法将编码后的`header`、编码后的`payload`、用`secret`进行加密。例如使用的是`HMAC SHA256`算法，大致流程类似于: `HMACSHA256( base64UrlEncode(header) + “.” + base64UrlEncode(payload),secret)`这个`signature`字段被用来确认`JWT`信息的发送者是谁，并保证信息没有被修改 。
+
+- 验证流程：
+
+  - 在头部信息中声明加密算法和常量，然后把`header`使用`json`转化为字符串
+  - 在载荷中声明用户信息，同时还有一些其他的内容，再次使用json把在和部分进行转化，转化为字符串
+  - 使用在`header`中声明的加密算法来进行加密，把第一部分字符串和第二部分的字符串结合和每个项目随机生成的`secret`字符串进行加密，生成新的字符串，此字符串是独一无二的
+  - 解密的时候，只要客户端带着`jwt`来发起请求，服务端就直接使用`secret`进行解密，解签证解出第一部分和第二部分，然后比对第二部分的信息和客户端穿过来的信息是否一致。如果一致验证成功，否则验证失败。
+
+  特点：
+
+  - 三部分组成，每一部分都进行字符串的转化
+  - 解密的时候没有使用数据库，仅仅使用的是`secret`进行解密
+  - `Jwt`使用的`secret`千万不能丢失
 
 ## 附加一个问题：cookie和token都存放在header中，为什么不会劫持token？
 
@@ -755,3 +784,11 @@ Access-Control-Max-Age: 86400
 DomContentLoaded在DOM Tree建立后运行 只监控DOM Tree
 
 window.onload在页面所有资源加载完后运行 监控当前网页所有资源
+
+LocalStorage 是一种浏览器端存储数据的方式，它的容量大小一般是在 5MB 到 10MB 之间的，具体的大小与不同的浏览器和操作系统有关。如果您需要存储更多的数据，可以考虑使用 IndexedDB 和 WebSQL 等其他浏览器端存储方案。
+
+对于sessionStorage，每个页面都有自己独立保存了一份sessionStorage，就算是几个窗口打开同一个页面，每个页面的sessionStorage互不影响
+
+相同浏览器下，并且是同源窗口（协议、域名、端口一致），不同页面可以共享localStorage，Cookies值，通过跳转的页面可以共享sessionStorage值。
+
+多窗口之间sessionStorage不可以共享状态！！！但是在某些特定场景下新开的页面会复制之前页面的sessionStorage！！（window.open 或者 a标签打开同源页面）

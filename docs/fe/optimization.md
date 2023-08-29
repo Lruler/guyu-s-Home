@@ -140,3 +140,58 @@ CDN (全称 Content Delivery Network)，即内容分发网络
 高速白屏的优化： 在可视区的上方和下方设定一个缓冲区
 
 其他优化方案: 使用 `IntersectionObserver` 监听事件 可以只监听可视区域的变化，使用 `ResizeObserver`监听内容区域宽高变
+
+## 首页白屏优化
+白屏时间即是，浏览器开始显示内容的时间，所以我们一般认为解析完<head>的时刻，或者开始渲染<body>标签就是该页面白屏结束的时间。
+
+白屏时间: window.performance.timing.domLoading - window.performance.timing.navigationStart
+
+首屏时间是指用户打开一个网站时，直到浏览器首页面内容渲染完成的时间。
+
+首屏时间: window.performance.timing.domInteractive - window.performace.timing.navigationStart
+
+1. DNS预解析
+ DNS预解析 -- 使用 meta 标签
+`<meta http-equiv="x-dns-prefetch-control" content="on" />`
+ DNS预解析 -- 使用 link 标签
+`<link rel="dns-prefetch" href="https://www.baidu.com" />`
+当浏览器访问一个域名的时候，需要解析一次DNS，获得对应域名的ip地址。
+浏览器缓存 => 系统缓存 => 路由器缓存 =>ISP(运营商)DNS缓存 => 根域名服务器 => 顶级域名服务器 => 主域名服务器的顺序
+逐步读取缓存，直到拿到IP地址
+
+作用：根据浏览器定义的规则，提前解析之后可能会用到的域名，使解析结果缓存到系统缓存中，缩短DNS解析时间，来提高网站的访问速度
+
+2. 路由，组件，图片等懒加载
+
+3. 合理是有tree shanking 减少代码体积
+
+4. 虚拟列表
+
+5. web worker优化长任务
+
+6. js的async和defer，一些link标签的preload,prefetch属性
+
+preload: 用于提前加载一些需要的依赖，这些资源会优先加载
+preload 特点：
+
+1）preload 加载的资源是在浏览器渲染机制之前进行处理的，并且不会阻塞 onload 事件；
+
+2）preload 加载的 JS 脚本其加载和执行的过程是分离的，即 preload 会预加载相应的脚本代码，待到需要时自行调用
+
+prefetch 是利用浏览器的空闲时间，加载页面将来可能用到的资源的一种机制；通常可以用于加载其他页面（非首页）所需要的资源，以便加快后续页面的打开速度
+
+prefetch 特点：
+
+1）pretch 加载的资源可以获取非当前页面所需要的资源，并且将其放入缓存至少5分钟（无论资源是否可以缓存）
+
+2）当页面跳转时，未完成的 prefetch 请求不会被中断
+
+7. ssr服务端渲染
+
+客户端渲染：获取 HTML 文件，根据需要下载 JavaScript 文件并运行，生成 DOM，然后再渲染。
+
+服务端渲染：服务端返回 HTML 文件，客户端只需解析 HTML。
+
+优点：首屏渲染快，对搜索引擎优化（SEO）好。
+
+缺点：配置麻烦，增加了服务器的计算压力。

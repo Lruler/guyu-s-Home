@@ -5,173 +5,35 @@ title: Vite
 小小的深入学习一下vite
 
 学习Vite之前 建议先去看一下ES Module 和 CommonJs的区别
+## 概览
+启动
 
-参考链接
-
-+ [阮一峰Module](https://www.bookstack.cn/read/es6-3rd/docs-module.md)、[二者区别](https://juejin.cn/post/6844904067651600391)、[进阶](https://juejin.cn/post/6994224541312483336)
-
-### ES Moudle 和Common JS区别
-
-如果没怎么写过node的话，Common Js 可能就没怎么接触过，这里就先简单介绍一下Common Js的用法。
-
-我们先明白如下概念
-
->Node中每个模块都有一个module对象， module对象中的有一个exports属性为一个接口对象， 我们需要把模块之间公共的方法或属性挂载在这个接口对象中， 方便其他的模块使用这些公共的方法或属性。
+> 先用 esbuild 进行预构建
 >
->Node中每个模块的最后， 都会return: module.exports。
+> - 将非 `ESM` 规范的代码转换为符合 `ESM` 规范的代码；
+> - 将第三方依赖内部的多个文件合并为一个，减少 `http` 请求数量；
 >
->Node中每个模块都会把module.exports指向的对象赋值给一个变量exports， 也就是说： exports = module.exports。
->
->module.exports = XXX， 表示当前模块导出一个单一成员， 结果就是XXX。
+> 然后不需要构建module graph，浏览器会根据ESM规范对各个模块发起请求，发起请求以后，`dev server` 端会通过 `middlewares` 对请求做拦截，然后对源文件做 `resolve`、`load`、`transform`、`parse` 操作，然后再将转换以后的内容发送给浏览器。
 
-直接看代码
+更新
 
-```js
-// m1.js
-let m1 = 0;
-let m2 = 1;
+> `dev server` 在监听到文件发生变化以后，只需要通过 `ws` 连接通知浏览器去重新加载变化的文件，剩下的工作就交给浏览器去做了。
 
-exports.m1 = m1;
-exports.m2 = m2;
+打包，通过 rollup来打包，和bundle的构建打包过程一致了。
+Rollup分为build（构建）阶段和output generate（输出生成）阶段。主要过程如下：
 
-// index.js
-const m = require('./m1.js')
-console.log(m)  // {m1: 0, m2: 1}
++ 获取入口文件的内容，包装成module，生成抽象语法树（AST）
++ 对入口文件抽象语法树进行依赖解析
++ 生成最终代码
++ 写入目标文件
 
-// 如果不想导出一个对象 就想导出一个值呢？
+打包产物：
 
-// m2.js
-let m1 = 0;
-module.exports = m1;
+与webpack产物的最大区别就是没有额外的注入代码
 
-// index.js
-const m = require('./m2.js')
-console.log(m)  // 0
-
-
-思考: 如果在 m2.js 中写 exports = m1， 那么index.js的log输出是什么
-
-```
-
-是{} 所以 我们知道 **使用module.exports可以给导出对象整个赋值，而exports只能给单个属性赋值**，所以就是刚刚提到的，exports其实是对module.exports的引用，我们require的是module.exports的值，而给exports直接赋值的话就切断了他们的引用关系。
-
-那么 对于CommonJs， 我们是不是可以这么理解:
-
-> m1.js, m2.js都是一个函数，我们通过require这个签名调用他们，exports就是他们的返回值。
-
-这么理解的话，下面Common Js的一些运行机制就容易理解了
-
-- CommonJS模块输出的是一个值的浅拷贝，ES6 模块输出的是值的引用；
-- CommonJS 模块是运行时加载，ES6 模块是编译时输出接口。
-- CommonJs输出的值会被缓存，也就是每个模块都只会被执行一次（这一点同import），这也是为什么会是浅拷贝的原因
-
-我们先不看后半部分，还没讲到。
-
-先看第一点，CommonJS模块输出的是一个值的拷贝，换句话说就是，一旦输出了某个值，如果模块内部后续的变化，影响不了外部对这个值的使用。具体例子：
-
-```js
-// m3.js
-let counter = 3;
-function incCounter() {
-  counter++;
-}
-module.exports = {
-  counter: counter,
-  incCounter: incCounter,
-};
-
-// index.js
-let mod = require('./m3');
-console.log(mod.counter);  // 3
-mod.incCounter();
-console.log(mod.counter); // 3
-```
-
-这样看可能难理解，那我们用刚刚说的，我们使用函数的思维来理解
-
-```js
-let count = 3;
-function incCounter() {
-  count++
-}
-
-function Myrequire() {
-  return {
-    count,
-    incCounter
-  }
-}
-
-let mod = Myrequire()
-console.log(mod.count); // 3
-mod.incCounter();
-console.log(mod.count); // 3
-```
-
-第二点运行时加载，这个直接看代码就懂了
-
-```js
-// m.js
-let m = 0;
-module.exports = m
-
-// index.js
-for (let i = 0; i < 3; ++i) {
-  let m 
-  if (i == 1) m = require('./3')
-  console.log(m)
-}
-// undefined 0 undefined
-```
-
-简单的提下ESM，export导出值，但import的name要和export一致，所以可以用export default，import的时候可以重命名
-
-import的值如果是简单变量，重新赋值会报错，因为是只读的，如果是引入一个对象的话就是可以改变这个对象的成员变量，因为import是对这个值的引用。
-
-然后 import() 动态加载，可以达到和require差不多的效果。 不过require是同步的（这也是不在浏览器环境中使用commonJS的原因，同步就代表代码需要加载完整个模块才能继续执行），import()是异步的。import.meta 获取一些源信息，比如env啊，URL啊之类的，Vi te等还提供了glod这样的批量导入的功能。
-
-**注意⚠️： ESM中，在一个模块中对导出的变量进行修改，都会影响到其他模块中对同一变量的对引用（cj会影响到，因为直接是浅拷贝），ESM会将模块导出的值包裹在一个只读的代理对象中，这个代理对象每次被导入都会被重新创建，从而确保每个模块都有自己的导出值**
-
-就是，ESM中，模块的导入和导出是静态的，有利于词法分析，但在加载和执行是动态的。
-
-导入导出关系在编译时静态确定，运行到导入模块语句时再动态加载执行
-
-### 循环依赖
-
-就是a加载了b而b又加载了a，二者的处理方式不同，所以结果会不同
-
-commonJs之前说过，同步+加载时执行（require还会缓存，比如require了a和b，然后a中也require也require了b，那b其实只会执行1次），所以是**输出的是当前已经执行那部分的值，而不是代码全部执行后的值**，所以可能会导致导出的值不是一个完整的对象。
-
-ESM会先创建一个未完成的模块对象，将其缓存，然后所有的模块都执行完成后再回到初始模块完成构建，确保导出的值时完整的，
-
-### 总结
-
-+ 因为**CommonJS**的`require`语法是同步的，所以就导致了**CommonJS**模块规范只适合用在服务端，而ES6模块无论是在浏览器端还是服务端都是可以使用的，但是在服务端中，还需要遵循一些特殊的规则才能使用 ；
-
-+ **CommonJS** 模块输出的是一个值的拷贝，而ES6 模块输出的是值的引用；
-
-+ **CommonJS** 模块是运行时加载，而ES6 模块是编译时输出接口，使得对JS的模块进行静态分析成为了可能；也实现了Tree Shanking这种优化技术。
-
-+ 因为两个模块加载机制的不同，所以在对待循环加载的时候，它们会有不同的表现。**CommonJS**遇到循环依赖的时候，只会输出已经执行的部分，后续的输出或者变化，是不会影响已经输出的变量。而ES6模块相反，使用`import`加载一个变量，变量不会被缓存，真正取值的时候就能取到最终的值；
-
-+ 关于模块顶层的`this`指向问题，在**CommonJS**顶层，`this`指向当前模块；而在ES6模块中，`this`指向`undefined`；但二者的作用域都是独立私有的，实现方式不同，CommonJs是在运行时被包装在一个函数中，就像我们刚刚提到的那样。
-
-+ 关于两个模块互相引用的问题，在ES6模块当中，是支持加载**CommonJS**模块的。但是反过来，**CommonJS**并不能`require`ES6模块，在NodeJS中，两种模块方案是分开处理的。
-
-## 先看看vite和Webpack的区别
-
-**webpack是先打包再启动开发服务器，vite是直接启动开发服务器，然后按需编译依赖文件。**
-
-##### 下面详细来说：
-
-- webpack先打包，再启动开发服务器，请求服务器时直接给予打包后的结果；
-- vite直接启动开发服务器，请求哪个模块再对哪个模块进行实时编译；
-- 由于现代浏览器本身就支持ES Modules，会主动发起请求去获取所需文件。vite充分利用这点，将开发环境下的模块文件，就作为浏览器要执行的文件，而不是像webpack先打包，交给浏览器执行的文件是打包后的；
-- 由于vite启动的时候不需要打包，也就无需分析模块依赖、编译，所以启动速度非常快。当浏览器请求需要的模块时，再对模块进行编译，这种按需动态编译的模式，极大缩短了编译时间，当项目越大，文件越多时，vite的开发时优势越明显；
-- 在HRM方面，当某个模块内容改变时，让浏览器去重新请求该模块即可，而不是像webpack重新将该模块的所有依赖重新编译；
-- 当需要打包到生产环境时，vite使用传统的rollup进行打包，所以，vite的优势是体现在开发阶段，另外，由于vite使用的是ES Module，所以代码中不可以使用CommonJs；
-
-简单点来说就是，webPack会先从你的入口文件开始，逐层寻找你的依赖，然后在统一打包编译，再由浏览器运行
+额外代码：
++ webpack自己的兼容代码，目的是自己实现require，modules.exports，export，让浏览器可以兼容cjs和esm语法
++ （可以理解为，webpack自己实现polyfill支持模块语法，rollup是利用高版本浏览器原生支持esm(所以rollup无需代码注入)）
 
 ### Tree shanking
 
@@ -189,7 +51,25 @@ Tree Shaking 的工作原理主要依赖于以下几个方面：
 
 总之，Tree Shaking 是一种用于移除未使用代码的优化技术。通过使用 Tree Shaking，开发者可以减小构建产物的体积，提高应用程序的加载性能。为了充分利用 Tree Shaking，建议使用 ES 模块，并确保构建工具和配置支持 Tree Shaking。
 
-## 官网
+
+## 先看看vite和Webpack的区别
+
+**webpack是先打包再启动开发服务器，vite是直接启动开发服务器，然后按需编译依赖文件。**
+
+##### 下面详细来说：
+
+- webpack先打包，再启动开发服务器，请求服务器时直接给予打包后的结果；
+- vite直接启动开发服务器，请求哪个模块再对哪个模块进行实时编译；
+- 由于现代浏览器本身就支持ES Modules，会主动发起请求去获取所需文件。vite充分利用这点，将开发环境下的模块文件，就作为浏览器要执行的文件，而不是像webpack先打包，交给浏览器执行的文件是打包后的；
+- 由于vite启动的时候不需要打包，也就无需分析模块依赖、编译，所以启动速度非常快。当浏览器请求需要的模块时，再对模块进行编译，这种按需动态编译的模式，极大缩短了编译时间，当项目越大，文件越多时，vite的开发时优势越明显；
+- 在HRM方面，当某个模块内容改变时，让浏览器去重新请求该模块即可，而不是像webpack重新将该模块的所有依赖重新编译；
+- 当需要打包到生产环境时，vite使用传统的rollup进行打包，所以，vite的优势是体现在开发阶段，另外，由于vite使用的是ES Module，所以代码中不可以使用CommonJs；
+
+简单点来说就是，webPack会先从你的入口文件开始，逐层寻找你的依赖，然后在统一打包编译，再由浏览器运行
+
+
+
+## Vite在官网上的介绍
 
 选Vite 可以解决两个问题
 
@@ -267,7 +147,7 @@ Vite 同时利用 HTTP 头来加速整个页面的重新加载（再次让浏览
 6. `writeBundle(options, bundle)`：在调用 bundle.write后，所有的chunk都写入文件后，最后会调用一次 writeBundle；
 7. `closeBundle()`：在服务器关闭时被调用
 
-![img](../../.vuepress/public/fe/bundle.webp)
+![img](../../.vuepress/public/fe/vite.webp)
 
 重点就是`fs`（文件系统）和`path`（文件路径）两个模块
 
@@ -279,57 +159,6 @@ Vite 同时利用 HTTP 头来加速整个页面的重新加载（再次让浏览
 
 在configServer里面来进行操作，configSerser接受的参数是dev server实例，然后server.middlewares.use，在这当中调用生成路由的函数并response即可。
 
-## 概览
-
-先概览一下，传统的bundle机制
-
-启动
-
-> 指定入口 - `entry`，然后以 `entry` 为起点，通过分析整个项目内各个源文件之间的依赖关系，构建一个模块依赖图 - `module graph`，然后再将 `module graph` 分离为三种类型的 `bundle`: `entry` 所在的 `initial bundle`、`lazy load` 需要的 `async bundle` 和自定义分离规则的 `custome bundle`
->
-> 构建过程
->
-> 1. 获取配置文件中 `entry` 对应的 `url` (这个 `url` 一般为相对路径);
-> 2. `resolve` - 将 `url` 解析为绝对路径，找到源文件在本地磁盘的位置，并构建一个 `module` 对象；
-> 3. `load` - 读取源文件的内容;
-> 4. `transform` - 使用对应的 `loader` 将源文件内容转化为浏览器可识别的类型；
-> 5. `parse` - 将转化后的源文件内容解析为 `AST` 对象，分析 `AST` 对象，找到源文件中的静态依赖(`import xxx from 'xxx'`) 和动态依赖(`import('xx')`)对应的 `url`, 并收集到 `module` 对象中；
-> 6. 遍历第 `5` 步收集到的静态依赖、动态依赖对应的 `url`，重复 `2` - `6` 步骤，直到项目中所有的源文件都遍历完成。
->
-> 分离过程
->
-> 1. 预处理 `module graph`，对 `module graph` 做 `tree shaking`；
-> 2. 遍历 `module graph`，根据静态、动态依赖关系，将 `module graph` 分解为 `initial chunk`、`async chunks`；
-> 3. 优化 `initial chunk`、 `async chunks` 中重复的 `module`；
-> 4. 根据 `optimization.splitChunks` 进行优化，分离第三方依赖、被多个 `chunk` 共享的 `module` 到 `common chunks` 中；
-> 5. 根据 `chunk` 类型，获取对应的 `template`；
-> 6. 遍历每个 `chunk` 中收集的 `module`，结合 `template`，为每个 `chunk` 构建最后的输出内容；
-> 7. 将最后的构建内容输出到 `output` 指定位置；
-
-更新
-
-> `dev server` 启动以后，会 `watch` 源文件的变化。当源文件发生变化后，`Webpack` 会重新编译打包。这个时候，由于我们只修改了一个文件，因此只需要对这个源文件做 `resolve`、 `load`、 `transfrom`、`parse` 操作，依赖的文件直接使用缓存，因此 `dev server` 的响应速度比冷启动要好很多。
->
-> `dev server` 重新编译打包以后，会通过 `ws` 连接通知浏览器去获取新的打包文件，然后对页面做局部更新。
-
-打包 过程和构建一致
-
-Vite的nobundle机制
-
-启动
-
-> 先用 esbuild 进行预构建
->
-> - 将非 `ESM` 规范的代码转换为符合 `ESM` 规范的代码；
-> - 将第三方依赖内部的多个文件合并为一个，减少 `http` 请求数量；
->
-> 然后不需要构建module graph，浏览器会根据ESM规范对各个模块发起请求，发起请求以后，`dev server` 端会通过 `middlewares` 对请求做拦截，然后对源文件做 `resolve`、`load`、`transform`、`parse` 操作，然后再将转换以后的内容发送给浏览器。
-
-更新
-
-> `dev server` 在监听到文件发生变化以后，只需要通过 `ws` 连接通知浏览器去重新加载变化的文件，剩下的工作就交给浏览器去做了。
-
-打包，通过 rollup来打包，和bundle的构建打包过程一致了。
 
 Vite的首评加载会很慢，可以通过prefetch来优化
 
