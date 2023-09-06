@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-71e4c758","path":"/docs/fe/pwa.html","title":"","lang":"en-US","frontmatter":{},"headers":[],"git":{"createdTime":1692943864000,"updatedTime":1692943864000,"contributors":[{"name":"lruler","email":"1204312199@qq.com","commits":1}]},"filePathRelative":"docs/fe/pwa.md"}');export{e as data};

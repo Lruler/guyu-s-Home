@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-7289a722","path":"/docs/fe/js-practice.html","title":"JS实践","lang":"en-US","frontmatter":{"title":"JS实践"},"headers":[],"git":{"createdTime":1692943864000,"updatedTime":1692943864000,"contributors":[{"name":"lruler","email":"1204312199@qq.com","commits":1}]},"filePathRelative":"docs/fe/js-practice.md"}');export{e as data};

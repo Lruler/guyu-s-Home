@@ -1,0 +1,1 @@
+import{_ as e,p as t,q as s,s as _}from"./framework-1749bed7.js";const c={},o=_("p",null,"Vue",-1),n=[o];function r(a,l){return t(),s("div",null,n)}const d=e(c,[["render",r],["__file","vue.html.vue"]]);export{d as default};

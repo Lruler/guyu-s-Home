@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-5bb7eb60","path":"/docs/fe/network.html","title":"计算机网络","lang":"en-US","frontmatter":{"title":"计算机网络"},"headers":[],"git":{"createdTime":1692943864000,"updatedTime":1692943864000,"contributors":[{"name":"lruler","email":"1204312199@qq.com","commits":1}]},"filePathRelative":"docs/fe/network.md"}');export{e as data};

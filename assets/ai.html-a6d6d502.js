@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-1be85705","path":"/docs/ai/ai.html","title":"人工智能","lang":"en-US","frontmatter":{"title":"人工智能"},"headers":[],"git":{"createdTime":1692943864000,"updatedTime":1692943864000,"contributors":[{"name":"lruler","email":"1204312199@qq.com","commits":1}]},"filePathRelative":"docs/ai/ai.md"}');export{e as data};

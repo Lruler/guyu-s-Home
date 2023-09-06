@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-d32451b6","path":"/docs/fe/ts-practice.html","title":"Ts应用","lang":"en-US","frontmatter":{"title":"Ts应用"},"headers":[],"git":{"createdTime":1692943864000,"updatedTime":1692943864000,"contributors":[{"name":"lruler","email":"1204312199@qq.com","commits":1}]},"filePathRelative":"docs/fe/ts-practice.md"}');export{e as data};
