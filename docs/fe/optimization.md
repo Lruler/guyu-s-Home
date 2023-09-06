@@ -2,33 +2,70 @@
 title: 性能优化
 ---
 ![](../../.vuepress/public/fe/youhua.webp)
-# 性能优化
 
-1. 减少HTTP请求：
-   - 合并CSS和JavaScript文件。
-   - 使用CSS Sprites将多个小图标合并成一张大图。
-   - 尽量使用字体图标（如Font Awesome）代替图片。
-2. 优化资源：
-   - 压缩CSS、JavaScript和HTML文件，减少文件大小。
-   - 优化图片大小，使用WebP、JPEG 2000等现代图像格式。
-   - 使用懒加载（Lazy Loading）技术，仅在需要时加载图片和其他资源。
-   - 使用预加载，预加载是一种优化策略，可以提前加载关键资源，以便在用户需要时立即可用。
-3. 利用浏览器缓存：
-   - 为静态资源设置合适的缓存策略（如Cache-Control和Expires头）。
-   - 使用Service Workers实现离线缓存。
-4. 优化网络传输：
-   - 使用CDN（内容分发网络）加速静态资源的加载。
-   - 开启HTTP压缩（如Gzip）以减少传输数据大小。
-   - 使用HTTP/2或HTTP/3协议以获得更高的传输性能。
-5. 使用Web性能API：
+## 性能优化
+
+所以前端的性能优化，就可以从一个经典问题 浏览器输入URL后发生什么 入手，从每一个步骤去思考优化的可能
+1. 网络传输阶段
+
+这个阶段可以：
+
++ DNS优化: 预解析
+
+   DNS预解析 -- 使用 meta 标签
+
+   `<meta http-equiv="x-dns-prefetch-control" content="on" />`
+
+   DNS预解析 -- 使用 link 标签
+
+   `<link rel="dns-prefetch" href="https://www.baidu.com" />`
+
+   当浏览器访问一个域名的时候，需要解析一次DNS，获得对应域名的ip地址。
+
+   浏览器缓存 => 系统缓存 => 路由器缓存 =>ISP(运营商)DNS缓存 => 根域名服务器 => 顶级域名服务器 => 主域名服务器的顺序逐步读取缓存，直到拿到IP地址
+   
+   作用：根据浏览器定义的规则，提前解析之后可能会用到的域名，使解析结果缓存到系统缓存中，缩短DNS解析时间，来提高网站的访问速度
++ HTTP优化
+  + 使用HTTP缓存（强缓存/协商缓存/service worker缓存离线资源）
+  + 减少HTTP请求
+     - 合并CSS和JavaScript文件。
+     - 使用CSS Sprites将多个小图标合并成一张大图。
+     - 尽量使用字体图标（如Font Awesome）代替图片。
+   + 优化资源加载
+     - 压缩CSS、JavaScript和HTML文件，减少文件大小。
+     - 优化图片大小，使用WebP、JPEG 2000等现代图像格式。
+     - 使用懒加载（Lazy Loading）技术，仅在需要时加载图片和其他资源。
+     - 使用预加载，预加载是一种优化策略，可以提前加载关键资源，以便在用户需要时立即可用。
+   + 优化网络传输：
+     - 使用CDN（内容分发网络）加速静态资源的加载。
+     - 开启HTTP压缩（如Gzip）以减少传输数据大小。
+     - 使用HTTP/2或HTTP/3协议以获得更高的传输性能。
+   + 使用SSR
+
+这里还要考虑一点，在网络传输的过程中是不是可以理解为数据体积越小速度越快？那其实打包工具的优化也可以放在这。
+  + 减少打包体积？
+    1. 按需加载，路由/类库
+    2. Scope Hoisting 会分析出模块之间的依赖关系，尽可能的把打包出来的模块合并到一个函数中去。
+    3. Tree Shaking 可以实现删除项目中未被引用的代码
+
+2. 渲染页面阶段
+
+这里其实就是更多的设计到一些代码层面的优化了，比如
++ 使用Web性能API：
    - 利用`requestAnimationFrame`进行动画操作，而不是`setTimeout`或`setInterval`。
    - 使用`window.performance` API监控页面性能。
-   - 减少回流（reflow）和重绘（repaint）：避免频繁修改样式，尽量在修改样式之前将元素设为`display: none`，完成修改后再显示
-6. 代码分割和按需加载：
-   - 使用Webpack等构建工具实现代码分割，仅加载需要的代码。
-   - 使用动态导入（Dynamic Imports）按需加载模块。
+   - 减少回流（reflow）和重绘（repaint）：避免频繁修改样式，尽量在修改样式之前将元素设`display: none`，完成修改后再显示
 
-7. 服务端渲染（Server Side Rendering, SSR）：通过在服务器端渲染页面，可以加快首屏渲染速度。
++ 使用按需加载（路由，组件，静态资源），代码分割
++ 虚拟列表
++ web worker处理长任务
++ js的async和defer，一些link标签的preload,prefetch属性
+
+什么是代码分割？
+
+代码分割是指，将脚本中无需立即调用的代码在代码构建时转变为异步加载的过程。
+
+在 Webpack 构建时，会避免加载已声明要异步加载的代码，异步代码会被单独分离出一个文件，当代码实际调用时被加载至页面。
 
 ### React性能优化
 
@@ -79,8 +116,7 @@ title: 性能优化
 4. 使用硬件加速：使用CSS属性translate3d、scale3d等可以启用GPU硬件加速，提高动画的性能。
 5. 避免使用阻塞操作：确保动画执行期间没有长时间的JavaScript计算或网络请求阻塞主线程。
 
-
-# CDN
+## CDN
 
 CDN (全称 Content Delivery Network)，即内容分发网络
 
@@ -90,7 +126,7 @@ CDN (全称 Content Delivery Network)，即内容分发网络
 
 于是，用户在上网的时候不用直接访问源站，而是访问离他“最近的”一个 CDN 节点，术语叫**边缘节点**，其实就是缓存了源站内容的代理服务器。如下图：
 
-# 虚拟列表
+## 虚拟列表
 
 和懒加载的区别
 
@@ -142,7 +178,7 @@ CDN (全称 Content Delivery Network)，即内容分发网络
 其他优化方案: 使用 `IntersectionObserver` 监听事件 可以只监听可视区域的变化，使用 `ResizeObserver`监听内容区域宽高变
 
 ## 首页白屏优化
-白屏时间即是，浏览器开始显示内容的时间，所以我们一般认为解析完<head>的时刻，或者开始渲染<body>标签就是该页面白屏结束的时间。
+白屏时间即是，浏览器开始显示内容的时间，所以我们一般认为解析完`<head>`的时刻，或者开始渲染`<body>`标签就是该页面白屏结束的时间。
 
 白屏时间: window.performance.timing.domLoading - window.performance.timing.navigationStart
 
@@ -195,3 +231,77 @@ prefetch 特点：
 优点：首屏渲染快，对搜索引擎优化（SEO）好。
 
 缺点：配置麻烦，增加了服务器的计算压力。
+
+
+**性能优化目前只是在自己的浏览器看，和用户机型实际的性能肯定有参差，那如何获取用户侧的性能指标呢？**
+
+用URM工具，或者在代码里面埋入`window.performace`和 `window.navigator`
+```js
+// window.performace
+// 提供了与浏览器性能相关的信息和指标。它允许开发者获取与页面加载、资源加载、导航和计时相关的性能数据
+1. window.performance.timing：这是一个包含了与页面加载相关的时间戳的对象。它提供了以下属性：
+
+   navigationStart：浏览器开始导航的时间戳。
+   unloadEventStart：前一个页面 unload 事件触发的时间戳。
+   unloadEventEnd：前一个页面 unload 事件完成的时间戳。
+   redirectStart：重定向开始的时间戳。
+   redirectEnd：重定向完成的时间戳。
+   fetchStart：浏览器开始获取页面资源的时间戳。
+   domainLookupStart：域名查询开始的时间戳。
+   domainLookupEnd：域名查询完成的时间戳。
+   connectStart：与服务器建立连接开始的时间戳。
+   connectEnd：与服务器建立连接完成的时间戳。
+   secureConnectionStart：安全连接开始的时间戳。
+   requestStart：浏览器向服务器发送请求的时间戳。
+   responseStart：接收到第一个字节的时间戳。
+   responseEnd：接收到最后一个字节的时间戳。
+   domLoading：开始解析 DOM 的时间戳。
+   domInteractive：DOM 解析完成、文档准备就绪的时间戳。
+   domContentLoadedEventStart：DOMContentLoaded 事件触发的时间戳。
+   domContentLoadedEventEnd：DOMContentLoaded 事件完成的时间戳。
+   domComplete：DOM 解析完成的时间戳。
+   loadEventStart：load 事件触发的时间戳。
+   loadEventEnd：load 事件完成的时间戳。
+   
+2. window.performance.navigation：这是一个包含有关页面导航的信息的对象。它提供了以下属性：
+
+   type：导航类型，如 0 表示同步导航，1 表示重定向导航，2 表示后退或前进导航。
+   redirectCount：重定向次数。
+
+3. window.performance.memory：这是一个包含与内存使用情况相关的信息的对象。它提供了以下属性：
+
+   jsHeapSizeLimit：JavaScript 堆内存的大小限制。
+   totalJSHeapSize：JavaScript 堆内存的当前使用量。
+   usedJSHeapSize：已经分配给 JavaScript 对象的堆内存。
+
+4. window.performance.now()：这是一个方法，返回从页面加载开始到调用该方法时经过的毫秒数。它可以用于测量代码执行的时间。
+```
+
+```js
+// window.navigator 
+// 是一个提供有关浏览器环境和用户设备的对象。它包含了许多属性和方法，可以用于获取有关浏览器、操作系统和设备的信息。
+
+window.navigator.userAgent：表示浏览器的用户代理字符串，其中包含了关于用户设备和浏览器的信息。通过解析该字符串，可以获取浏览器类型、版本、操作系统等信息。用正则解析
+
+window.navigator.platform：表示用户设备的操作系统平台信息，例如 "Win32"、"MacIntel" 等。
+
+window.navigator.language：表示用户设备的首选语言，通常是基于浏览器设置或操作系统语言。
+
+window.navigator.appVersion：表示浏览器的版本信息。
+
+window.navigator.cookieEnabled：表示浏览器是否启用了 Cookie。
+
+window.navigator.onLine：表示浏览器是否处于联网状态。
+
+window.navigator.geolocation：表示浏览器是否支持地理位置信息获取。
+
+window.navigator.plugins：表示浏览器安装的插件列表。
+
+window.navigator.mimeTypes：表示浏览器支持的 MIME 类型列表。
+
+window.navigator.getBattery()：获取用户设备的电池信息。
+
+window.navigator.vibrate()：控制设备进行振动。
+
+window.navigator.requestMIDIAccess()：请求访问 MIDI 设备。
+```

@@ -338,3 +338,9 @@ delete proxy.prop; // 无效，属性不可删除
 2. 静态绑定 禁止用with 创建eval作用域
 3. 禁止this指向全局对象(定时器的this还是指向window)
 
+
+
+### Object和Map的区别
++ object的key只能是string,number,symbol,而map的key可以是任意类型
++ object存储是无序的，map是有序的，所以map可以迭代(for of),可以直接获取长度
++ 解决同名碰撞 就是比如以`{}`为key,map则会有多个值，obj则只会有一个，因为map是根据`===`来判断key是否同名
